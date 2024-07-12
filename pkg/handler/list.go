@@ -1,4 +1,4 @@
-package render
+package handler
 
 import (
 	"google-mirror/pkg/model"
@@ -26,7 +26,7 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 	}()
-	log.Println("render list")
+	log.Println("handler list")
 	tmpl := template.New("list.html").Funcs(template.FuncMap{
 		"host": func(url string) string {
 			if u, err := nurl.Parse(url); err != nil {

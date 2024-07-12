@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
+	"google-mirror/pkg/handler"
 	"google-mirror/pkg/model"
-	"google-mirror/pkg/render"
 	"log"
 	"net/http"
 	"sync"
@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	listHandler := render.ListHandler{}
+	listHandler := handler.ListHandler{}
 
 	wg := sync.WaitGroup{}
 	for i := 0; i < len(cfg.Mirrors); i++ {
@@ -38,7 +38,7 @@ func main() {
 			for j := 0; j < len(urls); j++ {
 				m[urls[j]] = struct{}{}
 			}
-			item := render.ListItem{
+			item := handler.ListItem{
 				Name:    cfg.Mirrors[i],
 				Mirrors: []model.Mirror{},
 			}
@@ -47,12 +47,14 @@ func main() {
 					URL: k,
 				})
 			}
+			item.Mirrors = item.Mirrors[0:3] // TODO: debug
 			listHandler.Data.Items = append(listHandler.Data.Items, item)
 		}(i)
 	}
 	wg.Wait()
 
 	http.Handle("/list", &listHandler)
+	http.Handle("/api/get", &handler.GetHandler{})
 	log.Println("Listening on " + *addr)
 	http.ListenAndServe(*addr, nil)
 }

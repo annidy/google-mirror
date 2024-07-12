@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>mirrors</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   </head>
   <body>
     <h1>mirrors</h1>
@@ -18,14 +19,62 @@
     <div class="tab-content" id="myTabContent">
         {{range $index, $element := .Items}}
         <div class="tab-pane fade {{if eq $index 0}}  show active {{end}}" id="tab-{{$index}}-pane" role="tabpanel" aria-labelledby="tab-{{$index}}" tabindex="0">
+            {{range $index, $element := .Mirrors}}
             <ul class="list-group list-group-flush">
-                {{range $index, $element := .Mirrors}}
-                <li class="list-group-item"><a href="{{.URL}}">{{host .URL}}</li>
-                {{end}}
+                <li class="list-group-item mirror-data"><a href="{{.URL}}">{{host .URL}}</a></li>
+                <li class="list-group-item">
+                    <div id="progress" class="visually-hidden">连接时长</div>
+                    <div id="loader" class="spinner-border spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div id="img" class="visually-hidden">截图</div>
+                </li>
             </ul>
+            {{end}}
         </div>
         {{end}}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+
+    var eles = document.getElementsByClassName('mirror-data');
+    for (var i = 0; i < eles.length; i++) {
+        // 异步操作和循环变量共享的问题
+        (function(index) {
+            var e = eles[index];
+            var pe = e.parentElement;
+            var hosturl = e.textContent.trim(); 
+
+            // 使用fetch API发起异步请求
+            fetch('/api/get', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: "https://"+hosturl
+                })
+            }).then(response => {
+                pe.querySelector('#loader').classList.remove('visually-hidden');
+                pe.querySelector('#progress').classList.remove('visually-hidden');
+                if (!response.ok) {
+                    throw new Error('网络请求错误，状态码：' + response.status);
+                }
+                return response.json(); // 假设API返回JSON格式的数据
+            })
+            .then(data => {
+                // 请求成功，处理返回的数据
+                console.log('API返回数据:', data);
+                pe.querySelector('#progress').innerText = data.time + ' ms';
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+                pe.querySelector('#progress').innerText = '请求失败';
+            });
+        })(i)
+    }
+    </script>
   </body>
 </html>

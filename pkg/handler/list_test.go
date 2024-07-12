@@ -1,4 +1,4 @@
-package render_test
+package handler_test
 
 import (
 	"html/template"
@@ -84,4 +84,15 @@ func TestFunc1(t *testing.T) {
 	tmpl := template.New("foo").Funcs(template.FuncMap{"upper": func(s string) string { return strings.ToUpper(s) }})
 	tmpl = template.Must(tmpl.Parse("{{.}} - {{. | upper}}\n"))
 	tmpl.Execute(os.Stdout, "foo")
+}
+
+func TestFuncVar1(t *testing.T) {
+	tmpl := template.New("foo")
+	tmpl = template.Must(tmpl.Parse(`
+	{{$a := "foo"}}
+	{{if .}} {{$a = .}} {{end}}
+	Hello {{$a}}
+	`))
+	tmpl.Execute(os.Stdout, "sam") // Hello sam
+	tmpl.Execute(os.Stdout, "")    // Hello foo
 }
