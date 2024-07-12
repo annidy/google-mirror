@@ -20,16 +20,19 @@
         {{range $index, $element := .Items}}
         <div class="tab-pane fade {{if eq $index 0}}  show active {{end}}" id="tab-{{$index}}-pane" role="tabpanel" aria-labelledby="tab-{{$index}}" tabindex="0">
             {{range $index, $element := .Mirrors}}
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item mirror-data"><a href="{{.URL}}">{{host .URL}}</a></li>
-                <li class="list-group-item">
+            <ul class="list-group list-group-flush flex-row">
+                <li class="list-group-item mirror-data flex-fill"><a href="{{$element}}">{{host $element}}</a></li>
+                <li class="list-group-item flex-fill">
                     <div id="progress" class="visually-hidden">连接时长</div>
                     <div id="loader" class="spinner-border spinner-grow-sm" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </li>
-                <li class="list-group-item">
-                    <div id="img" class="visually-hidden">截图</div>
+                <li class="list-group-item flex-fill">
+                    <image id="img" style="width: 25%; height: auto;"
+                     src="/api/screenshot?url={{$element}}" 
+                     loading="lazy"
+                     />
                 </li>
             </ul>
             {{end}}

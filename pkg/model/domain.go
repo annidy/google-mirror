@@ -1,18 +1,29 @@
 package model
 
 import (
+	"io"
 	"log"
 	"net/http"
+	nurl "net/url"
 	"time"
 )
 
-func (m *Mirror) TakeSnapshot() error {
+func TestConnect(url string) (time.Duration, error) {
 	now := time.Now()
-	if _, err := http.Get(m.URL); err != nil {
-		log.Printf("get %s error: %s", m.URL, err)
-		return err
+	client := http.Client{
+		Timeout: 5 * time.Second,
 	}
-	m.ConnectTime = time.Since(now)
 
-	return nil
+	u, err := nurl.Parse(url)
+	if err != nil {
+		return 0, err
+	}
+	r, err := client.Do(&http.Request{URL: u})
+	if err != nil {
+		log.Printf("get %s error: %s", url, err)
+		return 0, err
+	}
+	defer r.Body.Close()
+	io.Copy(io.Discard, r.Body)
+	return time.Since(now), nil
 }

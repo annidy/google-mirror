@@ -5,6 +5,7 @@ import (
 	"google-mirror/pkg/model"
 	"log"
 	"net/http"
+	"time"
 )
 
 type GetHandler struct {
@@ -19,8 +20,10 @@ func (h *GetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("get %s", params)
 
-	m := model.Mirror{URL: params["url"]}
-	if err := m.TakeSnapshot(); err != nil {
+	url := params["url"]
+	var t time.Duration
+	var err error
+	if t, err = model.TestConnect(url); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -31,8 +34,8 @@ func (h *GetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rsp, err := json.Marshal(R{
-		Time: int(m.ConnectTime.Milliseconds()),
-		Host: m.URL,
+		Time: int(t.Milliseconds()),
+		Host: url,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

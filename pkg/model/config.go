@@ -8,8 +8,11 @@ import (
 )
 
 type Config struct {
-	Mirrors []string `yaml:"mirrors"`
+	ScreenshotTimeout int64    `yaml:"screenshot_timeout"`
+	Mirrors           []string `yaml:"mirrors"`
 }
+
+var ConfigFile = "config.yml"
 
 func readConf(filename string) (*Config, error) {
 	buf, err := os.ReadFile(filename)
@@ -27,9 +30,21 @@ func readConf(filename string) (*Config, error) {
 }
 
 func LoadConfig(file string) (*Config, error) {
+	ConfigFile = file
 	if cfg, err := readConf(file); err != nil {
 		return nil, err
 	} else {
 		return cfg, nil
 	}
+}
+
+func ReloadConfig() (*Config, error) {
+	return LoadConfig(ConfigFile)
+}
+
+func MustConfig(cfg *Config, err error) *Config {
+	if err != nil {
+		panic(err)
+	}
+	return cfg
 }

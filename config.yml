@@ -1,3 +1,4 @@
+screenshot_timeout: 5  #截图等待时间s
 mirrors:
   - https://fcp7.com/use-google-search.html
   - https://mirror.js.org/
