@@ -10,6 +10,7 @@ import (
 type Config struct {
 	ScreenshotTimeout int64    `yaml:"screenshot_timeout"`
 	Mirrors           []string `yaml:"mirrors"`
+	Blacklist         []string `yaml:"blacklist"`
 }
 
 var ConfigFile = "config.yml"

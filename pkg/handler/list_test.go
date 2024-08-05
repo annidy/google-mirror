@@ -51,6 +51,26 @@ func TestMust5(t *testing.T) {
 	tmpl.Execute(os.Stdout, map[string]string{"foo": "1", "bar": "2", "baz": "3"})
 }
 
+func TestMust6(t *testing.T) {
+	tmpl := template.New("foo")
+	tmpl = template.Must(tmpl.Parse(`{{range .}}
+		<li>{{.}}</li>
+	{{else}}
+		<li>no data</li>
+	{{end}}\n`))
+	tmpl.Execute(os.Stdout, nil)
+}
+
+func TestMust7(t *testing.T) {
+	tmpl := template.New("foo")
+	tmpl = template.Must(tmpl.Parse(`{{range $key, $value := .}}
+		<li>{{$key}} - {{$value}}</li>
+	{{else}}
+		<li>no data</li>
+	{{end}}\n`))
+	tmpl.Execute(os.Stdout, nil)
+}
+
 func TestIf1(t *testing.T) {
 	tmpl := template.New("foo")
 	tmpl = template.Must(tmpl.Parse("{{.}} - {{if . == 10}}真{{else}}假{{end}}\n"))
@@ -95,4 +115,17 @@ func TestFuncVar1(t *testing.T) {
 	`))
 	tmpl.Execute(os.Stdout, "sam") // Hello sam
 	tmpl.Execute(os.Stdout, "")    // Hello foo
+}
+
+func TestDefine1(t *testing.T) {
+	tmpl := template.New("foo")
+	tmpl = template.Must(tmpl.Parse(`{{define "bar"}}hello {{.}}{{end}}
+	{{template "bar" "again" }}`))
+	tmpl.Execute(os.Stdout, nil) // hello again
+}
+
+func TestDefine2(t *testing.T) {
+	tmpl := template.New("content.html")
+	tmpl = template.Must(tmpl.ParseFiles("content.html", "header.html", "footer.html"))
+	tmpl.Execute(os.Stdout, "Hello")
 }

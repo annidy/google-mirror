@@ -1,4 +1,7 @@
 screenshot_timeout: 5  #截图等待时间s
 mirrors:
-  - https://fcp7.com/use-google-search.html
-  - https://mirror.js.org/
+  - https://www.80srz.com/posts/1633.html
+  - https://www.munue.com/532.html
+blacklist:
+  - mirror.js.org
+  - .*.com

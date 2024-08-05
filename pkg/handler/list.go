@@ -6,7 +6,11 @@ import (
 	"log"
 	"net/http"
 	nurl "net/url"
+	"os"
+	"regexp"
+	"strings"
 	"sync"
+	"testing"
 )
 
 type ListItem struct {
@@ -43,10 +47,24 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			item := ListItem{
 				Name: cfg.Mirrors[i],
 			}
+		skip:
 			for k := range m {
+				for _, black := range cfg.Blacklist {
+					if re, err := regexp.Compile(black); err == nil {
+						if re.MatchString(k) {
+							log.Printf("ignore %s\n", k)
+							continue skip
+						}
+					} else {
+						log.Printf("invalid blacklist %s\n, %s", black, err)
+					}
+					if strings.Contains(k, black) {
+						continue skip
+					}
+				}
 				item.Mirrors = append(item.Mirrors, k)
 			}
-			item.Mirrors = item.Mirrors[0:3] // TODO: debug
+			// item.Mirrors = item.Mirrors[0:5] // TODO: debug
 			h.Data.Items = append(h.Data.Items, item)
 		}(i)
 	}
@@ -64,4 +82,10 @@ func (h *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tmpl = template.Must(tmpl.ParseFiles("resource/tmpl/list.html"))
 
 	tmpl.Execute(w, h.Data)
+}
+
+func TestDefine2(t *testing.T) {
+	tmpl := template.New("foo")
+	tmpl = template.Must(tmpl.ParseFiles("header.html", "footer.html", "content.html"))
+	tmpl.Execute(os.Stdout, "Hello")
 }
